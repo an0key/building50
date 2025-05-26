@@ -165,7 +165,9 @@
       {id: 2, lat: 51.495178, lon: 0.074885, label: '2', info: 'Entrance 2', serves: ['1-96']},
       {id: 3, lat: 51.495507, lon: 0.075035, label: '3', info: 'Entrance 3', serves: ['97-113']},
       {id: 4, lat: 51.495592, lon: 0.075620, label: '4', info: 'Entrance 4', serves: ['114-130']},
-      {id: 5, lat: 51.495427, lon: 0.075955, label: '5', info: 'Entrance 5', serves: ['131-226']},
+      {id: 5, lat: 51.495427, lon: 0.075955, label: '5', info: 'Entrance 5', serves: [
+        '131-146', '147-162', '163-178', '179-194', '195-210', '211-220', '221-226', 'Car Park'
+      ]},
       {id: 6, lat: 51.4951975, lon: 0.0760879, label: '6', info: 'Entrance 6', serves: [
         '131-146', '147-162', '163-178', '179-194', '195-210', '211-220', '221-226', 'Car Park'
       ]},
@@ -301,7 +303,7 @@
               <b>2:</b> 267–269, 255–258, 270<br>
               <b>G:</b> 227
             </span>`;
-          } else if (e.id === 6) {
+          } else if (e.id === 6 || e.id === 5) {
             html += `<br><b>Serves apartments:</b><br>`;
             html += `<span style=\"color:#1976d2\">
               <b>6:</b> 221–226<br>
@@ -323,12 +325,14 @@
         if (e.id === 's1' || e.id === 's2') {
           html += `<br><span style=\"color:#e53935;font-weight:bold;\">Note: The entrance numbers are not printed on these doors.</span>`;
         }
-        // Show S2, 8, or 6 images if S2, 8, or 6 entrance
+        // Show S2, 8, or 6 images if S2, 8, or 6 entrance (but not Entrance for 6)
         if (e.id === 's2' || e.id === 8 || e.id === 6) {
           const prefix = e.id === 's2' ? 'S2' : (e.id === 8 ? '8' : '6');
           html += `<div class=\"s2-image-row\">`;
+          if (e.id !== 6) {
+            html += `<div class=\"s2-image-thumb\"><a href=\"/images/core/${prefix}-Entrance.jpeg\" target=\"_blank\" rel=\"noopener\"><img src=\"/images/core/${prefix}-Entrance.jpeg\" alt=\"${prefix} Entrance\"></a><br><span>Entrance</span></div>`;
+          }
           html += `
-            <div class=\"s2-image-thumb\"><a href=\"/images/core/${prefix}-Entrance.jpeg\" target=\"_blank\" rel=\"noopener\"><img src=\"/images/core/${prefix}-Entrance.jpeg\" alt=\"${prefix} Entrance\"></a><br><span>Entrance</span></div>
             <div class=\"s2-image-thumb\"><a href=\"/images/core/${prefix}-External.jpeg\" target=\"_blank\" rel=\"noopener\"><img src=\"/images/core/${prefix}-External.jpeg\" alt=\"${prefix} External\"></a><br><span>External</span></div>
             <div class=\"s2-image-thumb\"><a href=\"/images/core/${prefix}-Floors.jpeg\" target=\"_blank\" rel=\"noopener\"><img src=\"/images/core/${prefix}-Floors.jpeg\" alt=\"${prefix} Floors\"></a><br><span>Floors</span></div>
           `;
