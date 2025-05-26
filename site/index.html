@@ -164,7 +164,9 @@
       {id: 1, lat: 51.494922, lon: 0.075011, label: '1', info: 'Entrance 1', serves: ['1-96']},
       {id: 2, lat: 51.495178, lon: 0.074885, label: '2', info: 'Entrance 2', serves: ['1-96']},
       {id: 3, lat: 51.495507, lon: 0.075035, label: '3', info: 'Entrance 3', serves: ['97-113']},
-      {id: 4, lat: 51.495592, lon: 0.075620, label: '4', info: 'Entrance 4', serves: ['114-130']},
+      {id: 4, lat: 51.4956673, lon: 0.0754844, label: '4', info: 'Entrance 4', serves: [
+        '129-130', '126-128', '123-125', '120-122', '117-119', '114-116', 'Car Park'
+      ]},
       {id: 5, lat: 51.4955027, lon: 0.0759628, label: '5', info: 'Entrance 5', serves: [
         '131-146', '147-162', '163-178', '179-194', '195-210', '211-220', '221-226', 'Car Park'
       ]},
@@ -313,6 +315,17 @@
               <b>2:</b> 163–178<br>
               <b>1:</b> 147–162<br>
               <b>G:</b> 131–146<br>
+              <b>B:</b> Car Park
+            </span>`;
+          } else if (e.id === 4) {
+            html += `<br><b>Serves apartments:</b><br>`;
+            html += `<span style=\"color:#1976d2\">
+              <b>5:</b> 129–130<br>
+              <b>4:</b> 126–128<br>
+              <b>3:</b> 123–125<br>
+              <b>2:</b> 120–122<br>
+              <b>1:</b> 117–119<br>
+              <b>G:</b> 114–116<br>
               <b>B:</b> Car Park
             </span>`;
           } else {
