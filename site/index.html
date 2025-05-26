@@ -167,7 +167,7 @@
       {id: 4, lat: 51.495592, lon: 0.075620, label: '4', info: 'Entrance 4', serves: ['114-130']},
       {id: 5, lat: 51.495427, lon: 0.075955, label: '5', info: 'Entrance 5', serves: ['131-226']},
       {id: 6, lat: 51.495061, lon: 0.076067, label: '6', info: 'Entrance 6', serves: ['131-226']},
-      {id: 8, lat: 51.494924, lon: 0.076019, label: '8', info: 'Entrance 8', serves: ['227', '270', '255-258', '267-269', '271-276', '277', '296', '307-310', '311-314', '321-322']},
+      {id: 8, lat: 51.4949996, lon: 0.0760259, label: '8', info: 'Entrance 8', serves: ['227', '270', '255-258', '267-269', '271-276', '277', '296', '307-310', '311-314', '321-322']},
       {id: 9, lat: 51.494802, lon: 0.075204, label: '9', info: 'Entrance 9', serves: ['239', '259-266', '281-290', '298-306', '315-320']},
     ];
 
@@ -288,6 +288,9 @@
           if (e.id === 's2') {
             html += `<br><b>Serves apartments:</b><br>`;
             html += `<span style=\"color:#1976d2\"><b>G:</b> 228-232, 243-246<br><b>1:</b> 247, 248<br><b>2:</b> 253, 254<br><b>Other:</b> 233-238, 240-242, 249, 250, 251, 252</span>`;
+          } else if (e.id === 8) {
+            html += `<br><b>Serves apartments:</b><br>`;
+            html += `<span style=\"color:#1976d2\">227, 270, 255-258, 267-269, 271-276, 277, 296, 307-310, 311-314, 321-322</span>`;
           } else {
             html += `<br><b>Serves apartments:</b> <span style=\"color:#1976d2\">${e.serves.join(', ')}</span>`;
           }
@@ -298,13 +301,14 @@
         if (e.id === 's1' || e.id === 's2') {
           html += `<br><span style=\"color:#e53935;font-weight:bold;\">Note: The entrance numbers are not printed on these doors.</span>`;
         }
-        // Show S2 images if S2 entrance
-        if (e.id === 's2') {
+        // Show S2 or 8 images if S2 or 8 entrance
+        if (e.id === 's2' || e.id === 8) {
+          const prefix = e.id === 's2' ? 'S2' : '8';
           html += `<div class=\"s2-image-row\">`;
           html += `
-            <div class=\"s2-image-thumb\"><a href=\"/images/core/S2-Entrance.jpeg\" target=\"_blank\" rel=\"noopener\"><img src=\"/images/core/S2-Entrance.jpeg\" alt=\"S2 Entrance\"></a><br><span>Entrance</span></div>
-            <div class=\"s2-image-thumb\"><a href=\"/images/core/S2-External.jpeg\" target=\"_blank\" rel=\"noopener\"><img src=\"/images/core/S2-External.jpeg\" alt=\"S2 External\"></a><br><span>External</span></div>
-            <div class=\"s2-image-thumb\"><a href=\"/images/core/S2-Floors.jpeg\" target=\"_blank\" rel=\"noopener\"><img src=\"/images/core/S2-Floors.jpeg\" alt=\"S2 Floors\"></a><br><span>Floors</span></div>
+            <div class=\"s2-image-thumb\"><a href=\"/images/core/${prefix}-Entrance.jpeg\" target=\"_blank\" rel=\"noopener\"><img src=\"/images/core/${prefix}-Entrance.jpeg\" alt=\"${prefix} Entrance\"></a><br><span>Entrance</span></div>
+            <div class=\"s2-image-thumb\"><a href=\"/images/core/${prefix}-External.jpeg\" target=\"_blank\" rel=\"noopener\"><img src=\"/images/core/${prefix}-External.jpeg\" alt=\"${prefix} External\"></a><br><span>External</span></div>
+            <div class=\"s2-image-thumb\"><a href=\"/images/core/${prefix}-Floors.jpeg\" target=\"_blank\" rel=\"noopener\"><img src=\"/images/core/${prefix}-Floors.jpeg\" alt=\"${prefix} Floors\"></a><br><span>Floors</span></div>
           `;
           html += `</div>`;
         }
