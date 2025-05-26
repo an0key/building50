@@ -107,7 +107,7 @@
               iconAnchor: [11, 11],
             })
           }).addTo(map);
-      userLocationMarker.bindTooltip('Apartment location', {permanent: false, direction: 'top'}).openTooltip();
+      userLocationMarker.bindTooltip('My location', {permanent: false, direction: 'top'}).openTooltip();
           map.setView([lat, lon], 18);
         }, function(err) {
           errorSpan.textContent = 'Unable to get your location.';
