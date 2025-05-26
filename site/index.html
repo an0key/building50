@@ -10,6 +10,38 @@
   <link rel="manifest" href="/site/site.webmanifest">
   <meta name="theme-color" content="#1976d2">
   <style>
+  .s2-image-row {
+    margin-top: 1em;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1em;
+    justify-content: center;
+  }
+  .s2-image-thumb {
+    text-align: center;
+    cursor: pointer;
+  }
+  .s2-image-thumb img {
+    max-width: 90px;
+    max-height: 70px;
+    border-radius: 6px;
+    box-shadow: 0 1px 6px #0002;
+    transition: transform 0.18s cubic-bezier(.4,2,.6,1), box-shadow 0.18s;
+    object-fit: cover;
+    border: 2px solid #eee;
+  }
+  .s2-image-thumb img:hover {
+    transform: scale(2.2);
+    z-index: 10;
+    box-shadow: 0 4px 24px #0005;
+    border: 2px solid #1976d2;
+    position: relative;
+  }
+  .s2-image-thumb span {
+    font-size: 0.95em;
+    display: block;
+    margin-top: 0.3em;
+  }
     body { font-family: sans-serif; margin: 2em; background: #f9f9f9; }
     .container { max-width: 600px; margin: auto; background: #fff; padding: 2em; border-radius: 8px; box-shadow: 0 2px 8px #0001; }
     h1 { text-align: center; color: #111; }
@@ -258,6 +290,16 @@
         }
         if (e.id === 's1' || e.id === 's2') {
           html += `<br><span style=\"color:#e53935;font-weight:bold;\">Note: The entrance numbers are not printed on these doors.</span>`;
+        }
+        // Show S2 images if S2 entrance
+        if (e.id === 's2') {
+          html += `<div class=\"s2-image-row\">`;
+          html += `
+            <div class=\"s2-image-thumb\"><img src=\"/site/images/core/S2-Entrance.jpeg\" alt=\"S2 Entrance\"><br><span>Entrance</span></div>
+            <div class=\"s2-image-thumb\"><img src=\"/site/images/core/S2-External.jpeg\" alt=\"S2 External\"><br><span>External</span></div>
+            <div class=\"s2-image-thumb\"><img src=\"/site/images/core/S2-Floors.jpeg\" alt=\"S2 Floors\"><br><span>Floors</span></div>
+          `;
+          html += `</div>`;
         }
       });
       infoDiv.innerHTML = html;
