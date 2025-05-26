@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Building 50 Entrance Finder</title>
+  <style>
+    body { font-family: sans-serif; margin: 2em; background: #f9f9f9; }
+    .container { max-width: 600px; margin: auto; background: #fff; padding: 2em; border-radius: 8px; box-shadow: 0 2px 8px #0001; }
+    h1 { text-align: center; color: #111; }
+    .map-container { position: relative; margin: 2em 0; }
+    .leaflet-container { font-family: inherit; }
+    .entrance-label {
+      font-size: 13px;
+      font-weight: bold;
+      background: rgba(255,255,255,0.85);
+      color: #1976d2;
+      border-radius: 4px;
+      padding: 1px 6px;
+      border: 1px solid #1976d2;
+      box-shadow: 0 1px 4px #0001;
+    }
+    .custom-marker {
+      background: #1976d2;
+      color: #fff;
+      border-radius: 50%;
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: bold;
+      border: 2px solid #fff;
+      box-shadow: 0 1px 4px #0002;
+      cursor: pointer;
+      transition: background 0.2s, border 0.2s;
+      text-align: center;
+      line-height: 22px;
+      padding: 0;
+    }
+    .custom-marker.active {
+      background: #e53935;
+      border: 2px solid #e53935;
+      z-index: 2;
+    }
+    .links { margin-bottom: 1em; }
+    .links a { margin-right: 1em; color: #111; text-decoration: none; }
+    .input-group { display: flex; gap: 0.5em; justify-content: center; align-items: center; }
+    input[type="number"] { width: 80px; padding: 0.5em; border: 1px solid #111; border-radius: 4px; color: #111; background: #fff; }
+    button { padding: 0.5em 1em; background: #111; color: #fff; border: 1px solid #111; border-radius: 4px; cursor: pointer; transition: background 0.2s, color 0.2s, border 0.2s; }
+    button:hover { background: #fff; color: #111; border: 1px solid #111; }
+    .note { color: #444; font-size: 0.95em; text-align: center; }
+    #copy-link-btn { margin-left: 1em; background: #fff; color: #111; border: 1px solid #111; }
+    #copy-link-btn:hover { background: #111; color: #fff; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Building 50 Entrance Finder</h1>
+    <div style="height:1em;"></div>
+    <form id="apt-form" class="input-group">
+      <input type="number" id="apt-input" min="1" max="322" placeholder="Apt #" required>
+      <button type="submit">Find Entrance</button>
+      <button type="button" id="show-location-btn">Show My Location</button>
+    </form>
+    <div style="height:1.2em;"></div>
+    <div class="note" style="margin-bottom:1.5em;">Enter an apartment number (1–322) to see which entrance to use.</div>
+    <div id="location-error" style="color:#e53935;text-align:center;margin:0.5em 0 0.5em 0;"></div>
+    <div class="map-container" style="width:100%;max-width:800px;height:500px;margin:auto;">
+      <div id="map" style="width:100%;height:500px;border-radius:8px;"></div>
+    </div>
+    <div id="entrance-info" style="max-width:800px;margin:1em auto 0 auto;padding:1em;background:#f1f1f1;border-radius:8px;display:none;"></div>
+    <div id="copy-link-container" style="text-align:center;margin-top:1em;display:none;">
+      <button id="copy-link-btn">Copy Link to This Page</button>
+      <span id="copy-link-status" style="margin-left:1em;color:#111;"></span>
+    </div>
+    <div style="text-align:center;margin-top:2.5em;">
+      <a href="about.html" style="color:#111;text-decoration:underline;font-size:1em;">About</a>
+    </div>
+  </div>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    let userLocationMarker = null;
+
+    window.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('show-location-btn').addEventListener('click', function() {
+        const errorSpan = document.getElementById('location-error');
+        errorSpan.textContent = '';
+        if (!navigator.geolocation) {
+          errorSpan.textContent = 'Geolocation is not supported by your browser.';
+          return;
+        }
+        navigator.geolocation.getCurrentPosition(function(pos) {
+          const lat = pos.coords.latitude;
+          const lon = pos.coords.longitude;
+          // Remove previous marker if exists
+          if (userLocationMarker) {
+            map.removeLayer(userLocationMarker);
+          }
+          userLocationMarker = L.marker([lat, lon], {
+            icon: L.divIcon({
+              className: 'custom-marker',
+              html: '<span style="background:#fff;color:#388e3c;border:2px solid #388e3c;width:18px;height:18px;display:inline-block;border-radius:50%;line-height:18px;font-size:12px;font-weight:bold;">●</span>',
+              iconSize: [22, 22],
+              iconAnchor: [11, 11],
+            })
+          }).addTo(map);
+      userLocationMarker.bindTooltip('Apartment location', {permanent: false, direction: 'top'}).openTooltip();
+          map.setView([lat, lon], 18);
+        }, function(err) {
+          errorSpan.textContent = 'Unable to get your location.';
+        });
+      });
+    });
+    // Center of Building 50
+    const centerLat = 51.495128;
+    const centerLon = 0.075542;
+
+    // Updated entrance coordinates and info
+    const entrances = [
+      {id: 's1', lat: 51.494678, lon: 0.075134, label: 'S1', info: 'Southern 1', serves: []},
+      {id: 's2', lat: 51.494869, lon: 0.076202, label: 'S2', info: 'Southern 2', serves: ['233-238', '240-242', '249', '250', '251', '252']},
+      {id: 1, lat: 51.494922, lon: 0.075011, label: '1', info: 'Entrance 1', serves: ['1-96']},
+      {id: 2, lat: 51.495178, lon: 0.074885, label: '2', info: 'Entrance 2', serves: ['1-96']},
+      {id: 3, lat: 51.495507, lon: 0.075035, label: '3', info: 'Entrance 3', serves: ['97-113']},
+      {id: 4, lat: 51.495592, lon: 0.075620, label: '4', info: 'Entrance 4', serves: ['114-130']},
+      {id: 5, lat: 51.495427, lon: 0.075955, label: '5', info: 'Entrance 5', serves: ['131-226']},
+      {id: 6, lat: 51.495061, lon: 0.076067, label: '6', info: 'Entrance 6', serves: ['131-226']},
+      {id: 8, lat: 51.494924, lon: 0.076019, label: '8', info: 'Entrance 8', serves: ['227', '270', '255-258', '267-269', '271-276', '277', '296', '307-310', '311-314', '321-322']},
+      {id: 9, lat: 51.494802, lon: 0.075204, label: '9', info: 'Entrance 9', serves: ['239', '259-266', '281-290', '298-306', '315-320']},
+    ];
+
+    // Apartment to entrance mapping (update as needed for S1/S2)
+    function getEntranceForApt(apt) {
+      // Accept both string and number input
+      if (typeof apt === 'string') apt = apt.trim().toUpperCase();
+      // S2: 233-238, 240-242, 249, 250, 251, 252
+      if (
+        apt === 'S2' ||
+        (typeof apt === 'number' && (
+          (apt >= 233 && apt <= 238) ||
+          (apt >= 240 && apt <= 242) ||
+          [249, 250, 251, 252].includes(apt)
+        ))
+      ) return 's2';
+
+      // 9: 239, 259-266, 281-290, 298-306, 315-320
+      if (
+        apt === 9 ||
+        (typeof apt === 'number' && (
+          apt === 239 ||
+          (apt >= 259 && apt <= 266) ||
+          (apt >= 281 && apt <= 290) ||
+          (apt >= 298 && apt <= 306) ||
+          (apt >= 315 && apt <= 320)
+        ))
+      ) return 9;
+
+      // 8: 227, 270, 255-258, 267-269, 271-276, 277, 296, 307-310, 311-314, 321-322
+      if (
+        apt === 8 ||
+        (typeof apt === 'number' && (
+          apt === 227 ||
+          apt === 270 ||
+          (apt >= 255 && apt <= 258) ||
+          (apt >= 267 && apt <= 269) ||
+          (apt >= 271 && apt <= 276) ||
+          apt === 277 ||
+          apt === 296 ||
+          (apt >= 307 && apt <= 310) ||
+          (apt >= 311 && apt <= 314) ||
+          (apt >= 321 && apt <= 322)
+        ))
+      ) return 8;
+
+      // 1: 1-96 (core 1 or 2)
+      if (apt === 1 || apt === 2 || (typeof apt === 'number' && apt >= 1 && apt <= 96)) return [1,2];
+      // 3: 97-113
+      if (apt === 3 || (typeof apt === 'number' && apt >= 97 && apt <= 113)) return 3;
+      // 4: 114-130
+      if (apt === 4 || (typeof apt === 'number' && apt >= 114 && apt <= 130)) return 4;
+      // 5: 131-226 (core 5 or 6)
+      if (apt === 5 || apt === 6 || (typeof apt === 'number' && apt >= 131 && apt <= 226)) return [5,6];
+
+      return null;
+    }
+
+    // Initialize Leaflet map (fit to all entrances)
+    const map = L.map('map');
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 20,
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Store marker references
+    const entranceMarkers = [];
+    const markerLatLngs = [];
+
+    entrances.forEach(e => {
+      // Custom HTML marker with number/label
+      const icon = L.divIcon({
+        className: 'custom-marker',
+        html: `<span>${e.label}</span>`,
+        iconSize: [22, 22],
+        iconAnchor: [11, 11],
+      });
+      const marker = L.marker([e.lat, e.lon], {icon}).addTo(map);
+      marker._entranceId = e.id;
+      marker._entranceInfo = e.info;
+      marker.on('click', function() {
+        showEntranceInfo(e, true);
+        highlightEntrance(e.id);
+      });
+      entranceMarkers.push(marker);
+      markerLatLngs.push([e.lat, e.lon]);
+    });
+
+    // Fit map to show all entrances
+    if (markerLatLngs.length > 0) {
+      map.fitBounds(markerLatLngs, {padding: [40, 40], maxZoom: 18});
+    } else {
+      map.setView([centerLat, centerLon], 18);
+    }
+
+    function highlightEntrance(entranceIds) {
+      // Accept single id or array
+      let ids = Array.isArray(entranceIds) ? entranceIds : (entranceIds ? [entranceIds] : []);
+      entranceMarkers.forEach((marker, idx) => {
+        const iconEl = marker.getElement();
+        if (!iconEl) return;
+        if (ids.includes(entrances[idx].id)) {
+          iconEl.classList.add('active');
+        } else {
+          iconEl.classList.remove('active');
+        }
+      });
+    }
+
+    function showEntranceInfo(entrancesArr, showServed=false) {
+      const infoDiv = document.getElementById('entrance-info');
+      let html = '';
+      if (!Array.isArray(entrancesArr)) entrancesArr = [entrancesArr];
+      entrancesArr.forEach((e, idx) => {
+        if (idx > 0) html += '<hr style="margin:0.5em 0">';
+        html += `<b>${e.info}</b><br>Lat: ${e.lat}, Lon: ${e.lon}`;
+        if (showServed && e.serves && e.serves.length > 0) {
+          html += `<br><b>Serves apartments:</b> <span style=\"color:#1976d2\">${e.serves.join(', ')}</span>`;
+        }
+        if (e.id === 8 || e.id === 9) {
+          html += `<br><span style=\"color:#e53935;font-weight:bold;\">The entrance and intercom are concealed, up a small footpath.</span>`;
+        }
+        if (e.id === 's1' || e.id === 's2') {
+          html += `<br><span style=\"color:#e53935;font-weight:bold;\">Note: The entrance numbers are not printed on these doors.</span>`;
+        }
+      });
+      infoDiv.innerHTML = html;
+      infoDiv.style.display = 'block';
+    }
+
+    function handleAptInput(apt) {
+      const entrance = getEntranceForApt(apt);
+      if (entrance == null) {
+        highlightEntrance(null);
+        document.getElementById('entrance-info').style.display = 'none';
+        document.getElementById('copy-link-container').style.display = 'none';
+        return;
+      }
+      // Always highlight all relevant entrances
+      highlightEntrance(entrance);
+      // Find entrance objects
+      let foundEntrances = Array.isArray(entrance)
+        ? entrance.map(id => entrances.find(en => en.id === id)).filter(Boolean)
+        : [entrances.find(en => en.id === entrance)].filter(Boolean);
+      if (foundEntrances.length > 0) {
+        showEntranceInfo(foundEntrances, true);
+        // No popups: just info panel
+        entranceMarkers.forEach(marker => marker.closePopup && marker.closePopup());
+        // Show copy link button
+        const aptVal = parseInt(document.getElementById('apt-input').value, 10);
+        if (!isNaN(aptVal)) {
+          document.getElementById('copy-link-container').style.display = 'block';
+        } else {
+          document.getElementById('copy-link-container').style.display = 'none';
+        }
+      } else {
+        document.getElementById('entrance-info').style.display = 'none';
+        document.getElementById('copy-link-container').style.display = 'none';
+      }
+    }
+
+    document.getElementById('apt-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const apt = parseInt(document.getElementById('apt-input').value, 10);
+      if (!isNaN(apt)) {
+        // Go to /<apt> page
+        window.location.pathname = '/' + apt;
+      } else {
+        handleAptInput(apt);
+      }
+    });
+
+    // Support /<apt> in URL path
+    function getAptFromPath() {
+      const path = window.location.pathname.replace(/^\/+|\/+$/g, '');
+      // Only match a single number (flat number) at root
+      if (/^\d{1,3}$/.test(path)) {
+        return parseInt(path, 10);
+      }
+      return null;
+    }
+
+    // On load, check for /<apt> and auto-fill
+    window.addEventListener('DOMContentLoaded', function() {
+      const aptFromPath = getAptFromPath();
+      if (aptFromPath !== null) {
+        document.getElementById('apt-input').value = aptFromPath;
+        handleAptInput(aptFromPath);
+      }
+      // Copy link button logic
+      document.getElementById('copy-link-btn').addEventListener('click', function() {
+        const aptVal = document.getElementById('apt-input').value;
+        const url = window.location.origin + '/' + aptVal;
+        navigator.clipboard.writeText(url).then(function() {
+          document.getElementById('copy-link-status').textContent = 'Copied!';
+          setTimeout(() => { document.getElementById('copy-link-status').textContent = ''; }, 2000);
+        }, function() {
+          document.getElementById('copy-link-status').textContent = 'Failed to copy.';
+        });
+      });
+    });
+
+    // Initial render (no highlight)
+    highlightEntrance(null);
+    document.getElementById('entrance-info').style.display = 'none';
+    // Close all popups on load
+    entranceMarkers.forEach(marker => marker.closePopup && marker.closePopup());
+  </script>
+</body>
+</html>
