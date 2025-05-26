@@ -158,7 +158,9 @@
     // Updated entrance coordinates and info
     const entrances = [
       {id: 's1', lat: 51.494678, lon: 0.075134, label: 'S1', info: 'Southern 1', serves: []},
-      {id: 's2', lat: 51.494869, lon: 0.076202, label: 'S2', info: 'Southern 2', serves: ['233-238', '240-242', '249', '250', '251', '252']},
+      {id: 's2', lat: 51.494869, lon: 0.076202, label: 'S2', info: 'Southern 2', serves: [
+        '228-232', '233-238', '240-242', '243-246', '247', '248', '249', '250', '251', '252', '253', '254'
+      ]},
       {id: 1, lat: 51.494922, lon: 0.075011, label: '1', info: 'Entrance 1', serves: ['1-96']},
       {id: 2, lat: 51.495178, lon: 0.074885, label: '2', info: 'Entrance 2', serves: ['1-96']},
       {id: 3, lat: 51.495507, lon: 0.075035, label: '3', info: 'Entrance 3', serves: ['97-113']},
@@ -283,7 +285,12 @@
         if (idx > 0) html += '<hr style="margin:0.5em 0">';
         html += `<b>${e.info}</b><br>Lat: ${e.lat}, Lon: ${e.lon}`;
         if (showServed && e.serves && e.serves.length > 0) {
-          html += `<br><b>Serves apartments:</b> <span style=\"color:#1976d2\">${e.serves.join(', ')}</span>`;
+          if (e.id === 's2') {
+            html += `<br><b>Serves apartments:</b><br>`;
+            html += `<span style=\"color:#1976d2\"><b>G:</b> 228-232, 243-246<br><b>1:</b> 247, 248<br><b>2:</b> 253, 254<br><b>Other:</b> 233-238, 240-242, 249, 250, 251, 252</span>`;
+          } else {
+            html += `<br><b>Serves apartments:</b> <span style=\"color:#1976d2\">${e.serves.join(', ')}</span>`;
+          }
         }
         if (e.id === 8 || e.id === 9) {
           html += `<br><span style=\"color:#e53935;font-weight:bold;\">The entrance and intercom are concealed, up a small footpath.</span>`;
