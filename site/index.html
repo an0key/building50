@@ -453,14 +453,23 @@
       let aptNum = parseInt(document.getElementById('apt-input').value, 10);
       if (!isNaN(aptNum) && foundEntrances.length > 0) {
         let msg = '';
-        foundEntrances.forEach((enObj, idx) => {
-          if (idx > 0) msg += ' / ';
+        if (foundEntrances.length === 1) {
+          let enObj = foundEntrances[0];
           let floor = getFloorForApt(aptNum, enObj);
-          msg += `Apartment ${aptNum} is accessed via Core/Entrance <b>${enObj.label}</b>`;
+          msg = `Apartment ${aptNum} is accessed via Core/Entrance <b>${enObj.label}</b>`;
           if (floor) {
             msg += `, and is on Floor <b>${floor}</b>`;
           }
-        });
+        } else {
+          // Multiple entrances (e.g. [1,2] or [5,6])
+          let labels = foundEntrances.map(enObj => `<b>${enObj.label}</b>`).join(' or ');
+          // Try to get floor (should be the same for both)
+          let floor = getFloorForApt(aptNum, foundEntrances[0]);
+          msg = `Apartment ${aptNum} is accessed via Core/Entrance ${labels}`;
+          if (floor) {
+            msg += `, and is on Floor <b>${floor}</b>`;
+          }
+        }
         infoMsgDiv.innerHTML = msg;
         infoMsgDiv.style.display = '';
         instructionDiv.style.display = 'none';
