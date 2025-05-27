@@ -4,10 +4,47 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Building 50 Entrance Finder</title>
+  <link rel="icon" type="image/x-icon" href="/site/images/favicon.ico">
+  <link rel="icon" type="image/svg+xml" href="/site/images/b50-icon.svg">
+  <link rel="apple-touch-icon" sizes="180x180" href="/site/images/apple-touch-icon.png">
+  <link rel="manifest" href="/site/site.webmanifest">
+  <meta name="theme-color" content="#1976d2">
   <style>
-    body { font-family: sans-serif; margin: 2em; background: #f9f9f9; }
-    .container { max-width: 600px; margin: auto; background: #fff; padding: 2em; border-radius: 8px; box-shadow: 0 2px 8px #0001; }
-    h1 { text-align: center; color: #111; }
+  .s2-image-row {
+    margin-top: 1em;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1em;
+    justify-content: center;
+  }
+  .s2-image-thumb {
+    text-align: center;
+    cursor: pointer;
+  }
+  .s2-image-thumb img {
+    max-width: 90px;
+    max-height: 70px;
+    border-radius: 6px;
+    box-shadow: 0 1px 6px #0002;
+    transition: transform 0.18s cubic-bezier(.4,2,.6,1), box-shadow 0.18s;
+    object-fit: cover;
+    border: 2px solid #eee;
+  }
+  .s2-image-thumb img:hover {
+    transform: scale(2.2);
+    z-index: 10;
+    box-shadow: 0 4px 24px #0005;
+    border: 2px solid #1976d2;
+    position: relative;
+  }
+  .s2-image-thumb span {
+    font-size: 0.95em;
+    display: block;
+    margin-top: 0.3em;
+  }
+    body { font-family: sans-serif; margin: 0.5em 0 1.2em 0; background: #f9f9f9; }
+    .container { max-width: 600px; margin: 0.5em auto 0 auto; background: #fff; padding: 1.1em 1em 1.5em 1em; border-radius: 8px; box-shadow: 0 2px 8px #0001; }
+    h1 { text-align: center; color: #111; margin-top: 0.2em; margin-bottom: 0.5em; font-size: 2em; }
     .map-container { position: relative; margin: 2em 0; }
     .leaflet-container { font-family: inherit; }
     .entrance-label {
@@ -65,7 +102,8 @@
       <button type="button" id="show-location-btn">Show My Location</button>
     </form>
     <div style="height:1.2em;"></div>
-    <div class="note" style="margin-bottom:1.5em;">Enter an apartment number (1–322) to see which entrance to use.</div>
+    <div class="note" id="apt-instruction" style="margin-bottom:1.5em;">Enter an apartment number (1–322) to see which entrance to use.</div>
+    <div id="apt-info-msg" style="color:#1976d2;font-size:1.08em;text-align:center;margin-bottom:1.5em;display:none;"></div>
     <div id="location-error" style="color:#e53935;text-align:center;margin:0.5em 0 0.5em 0;"></div>
     <div class="map-container" style="width:100%;max-width:800px;height:500px;margin:auto;">
       <div id="map" style="width:100%;height:500px;border-radius:8px;"></div>
@@ -107,7 +145,7 @@
               iconAnchor: [11, 11],
             })
           }).addTo(map);
-      userLocationMarker.bindTooltip('My location', {permanent: false, direction: 'top'}).openTooltip();
+      userLocationMarker.bindTooltip('My Location', {permanent: false, direction: 'top'}).openTooltip();
           map.setView([lat, lon], 18);
         }, function(err) {
           errorSpan.textContent = 'Unable to get your location.';
@@ -120,40 +158,114 @@
 
     // Updated entrance coordinates and info
     const entrances = [
-      {id: 's1', lat: 51.494678, lon: 0.075134, label: 'S1', info: 'Southern 1', serves: []},
-      {id: 's2', lat: 51.494869, lon: 0.076202, label: 'S2', info: 'Southern 2', serves: ['233-238', '240-242', '249', '250', '251', '252']},
-      {id: 1, lat: 51.494922, lon: 0.075011, label: '1', info: 'Entrance 1', serves: ['1-96']},
-      {id: 2, lat: 51.495178, lon: 0.074885, label: '2', info: 'Entrance 2', serves: ['1-96']},
-      {id: 3, lat: 51.495507, lon: 0.075035, label: '3', info: 'Entrance 3', serves: ['97-113']},
-      {id: 4, lat: 51.495592, lon: 0.075620, label: '4', info: 'Entrance 4', serves: ['114-130']},
-      {id: 5, lat: 51.495427, lon: 0.075955, label: '5', info: 'Entrance 5', serves: ['131-226']},
-      {id: 6, lat: 51.495061, lon: 0.076067, label: '6', info: 'Entrance 6', serves: ['131-226']},
-      {id: 8, lat: 51.494924, lon: 0.076019, label: '8', info: 'Entrance 8', serves: ['227', '270', '255-258', '267-269', '271-276', '277', '296', '307-310', '311-314', '321-322']},
-      {id: 9, lat: 51.494802, lon: 0.075204, label: '9', info: 'Entrance 9', serves: ['239', '259-266', '281-290', '298-306', '315-320']},
+      {id: 's1', lat: 51.49470240820116, lon: 0.07517491643396525, label: 'S1', info: 'Southern 1', serves: [
+        '2: 251, 252',
+        '1: 249, 250',
+        'G: 240-242, 233-238'
+      ]},
+      {id: 's2', lat: 51.494867204672595, lon: 0.07617806656546598, label: 'S2', info: 'Southern 2', serves: [
+        '2: 253, 254',
+        '1: 247, 248',
+        'G: 243-246, 228-232'
+      ]},
+      {id: 1, lat: 51.49502465297843, lon: 0.07498103026838271, label: '1', info: 'Entrance 1', serves: [
+        '6: 91–93',
+        '5: 81–84, 90',
+        '4: 65–70, 79, 80',
+        '3: 49–54, 63, 64',
+        '2: 33–38, 47, 48',
+        '1: 17–22, 31, 32',
+        'G: 9–16',
+        'B: Car Park'
+      ]},
+      {id: 2, lat: 51.49531540607916, lon: 0.07485458277281538, label: '2', info: 'Entrance 2', serves: [
+        '6: 94–96',
+        '5: 85–89',
+        '4: 71–78',
+        '3: 55–62',
+        '2: 39–46',
+        '1: 23–30',
+        'G: 1–8',
+        'B: Car Park'
+      ]},
+      {id: 3, lat: 51.49557361847723, lon: 0.07521706559772619, label: '3', info: 'Entrance 3', serves: [
+        '5: 112–113',
+        '4: 109–111',
+        '3: 106–108',
+        '2: 103–105',
+        '1: 100–102',
+        'G: 97–99',
+        'B: Car Park'
+      ]},
+      {id: 4, lat: 51.49560720697334, lon: 0.0754514149561776, label: '4', info: 'Entrance 4', serves: [
+        '5: 129–130',
+        '4: 126–128',
+        '3: 123–125',
+        '2: 120–122',
+        '1: 117–119',
+        'G: 114–116',
+        'B: Car Park'
+      ]},
+      {id: 5, lat: 51.495498044267784, lon: 0.07595720495272858, label: '5', info: 'Entrance 5', serves: [
+        '6: 221–226',
+        '5: 211–220',
+        '4: 195–210',
+        '3: 179–194',
+        '2: 163–178',
+        '1: 147–162',
+        'G: 131–146',
+        'B: Car Park'
+      ]},
+      {id: 6, lat: 51.495203093730154, lon: 0.07609039631544023, label: '6', info: 'Entrance 6', serves: [
+        '6: 221–226',
+        '5: 211–220',
+        '4: 195–210',
+        '3: 179–194',
+        '2: 163–178',
+        '1: 147–162',
+        'G: 131–146',
+        'B: Car Park'
+      ]},
+      {id: 8, lat: 51.49497217027241, lon: 0.07600104008523932, label: '8', info: 'Entrance 8', serves: [
+        '5: 321, 322, 311–314',
+        '4: 307–310, 291–296',
+        '3: 277–280, 271–276',
+        '2: 267–269, 255–258, 270',
+        'G: 227',
+        'B: Car Park'
+      ]},
+      {id: 9, lat: 51.49484516186698, lon: 0.07525078493130564, label: '9', info: 'Entrance 9', serves: [
+        '5: 315–320',
+        '4: 297–306',
+        '3: 281–290',
+        '2: 259–266',
+        'G: 239',
+        'B: Car Park'
+      ]},
     ];
 
     // Apartment to entrance mapping (update as needed for S1/S2)
     function getEntranceForApt(apt) {
       // Accept both string and number input
       if (typeof apt === 'string') apt = apt.trim().toUpperCase();
-      // S2: 233-238, 240-242, 249, 250, 251, 252
+      // S2: 228-232, 243-246, 247, 248, 253, 254
       if (
         apt === 'S2' ||
         (typeof apt === 'number' && (
-          (apt >= 233 && apt <= 238) ||
-          (apt >= 240 && apt <= 242) ||
-          [249, 250, 251, 252].includes(apt)
+          (apt >= 228 && apt <= 232) ||
+          (apt >= 243 && apt <= 246) ||
+          [247, 248, 253, 254].includes(apt)
         ))
       ) return 's2';
 
-      // 9: 239, 259-266, 281-290, 298-306, 315-320
+      // 9: 239, 259-266, 281-290, 297-306, 315-320
       if (
         apt === 9 ||
         (typeof apt === 'number' && (
           apt === 239 ||
           (apt >= 259 && apt <= 266) ||
           (apt >= 281 && apt <= 290) ||
-          (apt >= 298 && apt <= 306) ||
+          (apt >= 297 && apt <= 306) ||
           (apt >= 315 && apt <= 320)
         ))
       ) return 9;
@@ -173,7 +285,7 @@
           (apt >= 311 && apt <= 314) ||
           (apt >= 321 && apt <= 322)
         ))
-      ) return 8;
+    )return 8;
 
       // 1: 1-96 (core 1 or 2)
       if (apt === 1 || apt === 2 || (typeof apt === 'number' && apt >= 1 && apt <= 96)) return [1,2];
@@ -244,27 +356,98 @@
       if (!Array.isArray(entrancesArr)) entrancesArr = [entrancesArr];
       entrancesArr.forEach((e, idx) => {
         if (idx > 0) html += '<hr style="margin:0.5em 0">';
-        html += `<b>${e.info}</b><br>Lat: ${e.lat}, Lon: ${e.lon}`;
-        if (showServed && e.serves && e.serves.length > 0) {
-          html += `<br><b>Serves apartments:</b> <span style=\"color:#1976d2\">${e.serves.join(', ')}</span>`;
-        }
+        // Entrance name and coordinates
+        html += `<b>${e.info}</b> <span style="color:#888;font-size:0.97em;">(${e.lat.toFixed(6)}, ${e.lon.toFixed(6)})</span>`;
+
+        // Notes about concealed/unlabelled entrances (directly under name/coords)
         if (e.id === 8 || e.id === 9) {
-          html += `<br><span style=\"color:#e53935;font-weight:bold;\">The entrance and intercom are concealed, up a small footpath.</span>`;
+          html += `<br><span style=\"color:#e53935;font-weight:bold;display:block;margin-top:0.2em;\">The entrance and intercom are concealed, up a small footpath.</span>`;
         }
         if (e.id === 's1' || e.id === 's2') {
-          html += `<br><span style=\"color:#e53935;font-weight:bold;\">Note: The entrance numbers are not printed on these doors.</span>`;
+          html += `<br><span style=\"color:#e53935;font-weight:bold;display:block;margin-top:0.2em;\">Note: The entrance numbers are not printed on these doors.</span>`;
         }
+
+        // Floor breakdown (apartments per floor)
+        if (showServed && e.serves && e.serves.length > 0) {
+          html += `<br><b>Serves apartments:</b><br>`;
+          html += `<span style=\"color:#1976d2\">`;
+          e.serves.forEach(floor => {
+            const match = floor.match(/^([\dGB]): (.+)$/);
+            if (match) {
+              html += `<b>${match[1]}:</b> ${match[2]}<br>`;
+            } else {
+              html += `${floor}<br>`;
+            }
+          });
+          html += `</span>`;
+        }
+
+        // Images (move up, less margin)
+        let prefix =
+          e.id === 's2' ? 'S2'
+          : e.id === 's1' ? 'S1'
+          : e.id === 9 ? '9'
+          : e.id === 8 ? '8'
+          : e.id === 6 ? '6'
+          : e.id === 5 ? '5'
+          : e.id === 4 ? '4'
+          : e.id === 3 ? '3'
+          : e.id === 2 ? '2'
+          : e.id === 1 ? '1'
+          : e.id;
+
+        html += `<div class=\"s2-image-row\" style=\"margin-top:0.5em;margin-bottom:0.7em;\">`;
+        // Entrance image for 8 and 9 only
+        if (e.id === 8) {
+          html += `<div class=\"s2-image-thumb\"><a href=\"/images/core/8-Entrance.jpeg\" target=\"_blank\" rel=\"noopener\"><img src=\"/images/core/8-Entrance.jpeg\" alt=\"8 Entrance\"></a><br><span>Entrance</span></div>`;
+        } else if (e.id === 9) {
+          html += `<div class=\"s2-image-thumb\"><a href=\"/images/core/9-Enterance.jpeg\" target=\"_blank\" rel=\"noopener\"><img src=\"/images/core/9-Enterance.jpeg\" alt=\"9 Entrance\"></a><br><span>Entrance</span></div>`;
+        }
+        // External image for all
+        html += `<div class=\"s2-image-thumb\"><a href=\"/images/core/${prefix}-External.jpeg\" target=\"_blank\" rel=\"noopener\"><img src=\"/images/core/${prefix}-External.jpeg\" alt=\"${prefix} External\"></a><br><span>External</span></div>`;
+        // Floors image for all
+        html += `<div class=\"s2-image-thumb\"><a href=\"/images/core/${prefix}-Floors.jpeg\" target=\"_blank\" rel=\"noopener\"><img src=\"/images/core/${prefix}-Floors.jpeg\" alt=\"${prefix} Floors\"></a><br><span>Floors</span></div>`;
+        html += `</div>`;
       });
       infoDiv.innerHTML = html;
       infoDiv.style.display = 'block';
     }
 
+    // Helper to get floor for a given apt and entrance
+    function getFloorForApt(apt, entranceObj) {
+      if (!entranceObj || !entranceObj.serves) return null;
+      for (const floor of entranceObj.serves) {
+        const match = floor.match(/^([\dGB]): (.+)$/);
+        if (match) {
+          const floorLabel = match[1];
+          const flats = match[2];
+          const nums = flats.split(',').flatMap(part => {
+            part = part.trim().replace(/–/g, '-');
+            if (/^\d+-\d+$/.test(part)) {
+              const [start, end] = part.split('-').map(Number);
+              return Array.from({length: end - start + 1}, (_, i) => start + i);
+            } else if (/^\d+$/.test(part)) {
+              return [Number(part)];
+            } else {
+              return [];
+            }
+          });
+          if (nums.includes(Number(apt))) return floorLabel;
+        }
+      }
+      return null;
+    }
+
     function handleAptInput(apt) {
       const entrance = getEntranceForApt(apt);
+      const instructionDiv = document.getElementById('apt-instruction');
+      const infoMsgDiv = document.getElementById('apt-info-msg');
       if (entrance == null) {
         highlightEntrance(null);
         document.getElementById('entrance-info').style.display = 'none';
         document.getElementById('copy-link-container').style.display = 'none';
+        infoMsgDiv.style.display = 'none';
+        instructionDiv.style.display = '';
         return;
       }
       // Always highlight all relevant entrances
@@ -273,11 +456,42 @@
       let foundEntrances = Array.isArray(entrance)
         ? entrance.map(id => entrances.find(en => en.id === id)).filter(Boolean)
         : [entrances.find(en => en.id === entrance)].filter(Boolean);
+
+      // Info message logic
+      let aptNum = parseInt(document.getElementById('apt-input').value, 10);
+      if (!isNaN(aptNum) && foundEntrances.length > 0) {
+        let msg = '';
+        if (foundEntrances.length === 1) {
+          let enObj = foundEntrances[0];
+          let floor = getFloorForApt(aptNum, enObj);
+          msg = `Apartment ${aptNum} is accessed via Core/Entrance <b>${enObj.label}</b>`;
+          if (floor) {
+            msg += `, and is on Floor <b>${floor}</b>`;
+          }
+        } else {
+          // Multiple entrances (e.g. [1,2] or [5,6])
+          let labels = foundEntrances.map(enObj => `<b>${enObj.label}</b>`).join(' or ');
+          // Show floor info for each entrance if possible
+          let floors = foundEntrances.map(enObj => getFloorForApt(aptNum, enObj));
+          let uniqueFloors = [...new Set(floors.filter(Boolean))];
+          msg = `Apartment ${aptNum} is accessed via Core/Entrance ${labels}`;
+          if (uniqueFloors.length === 1) {
+            msg += `, and is on Floor <b>${uniqueFloors[0]}</b>`;
+          } else if (uniqueFloors.length > 1) {
+            msg += `, and is on Floor <b>${uniqueFloors.join(' or ')}</b>`;
+          }
+        }
+        infoMsgDiv.innerHTML = msg;
+        infoMsgDiv.style.display = '';
+        instructionDiv.style.display = 'none';
+      } else {
+        infoMsgDiv.style.display = 'none';
+        instructionDiv.style.display = '';
+      }
+
       if (foundEntrances.length > 0) {
         showEntranceInfo(foundEntrances, true);
-        // No popups: just info panel
         entranceMarkers.forEach(marker => marker.closePopup && marker.closePopup());
-        // Show copy link button
         const aptVal = parseInt(document.getElementById('apt-input').value, 10);
         if (!isNaN(aptVal)) {
           document.getElementById('copy-link-container').style.display = 'block';
