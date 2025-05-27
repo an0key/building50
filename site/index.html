@@ -157,40 +157,96 @@
 
     // Updated entrance coordinates and info
     const entrances = [
-      {id: 's1', lat: 51.4946957, lon: 0.0751796, label: 'S1', info: 'Southern 1', serves: [
+      {id: 's1', lat: 51.49470240820116, lon: 0.07517491643396525, label: 'S1', info: 'Southern 1', serves: [
         '2: 251, 252',
         '1: 249, 250',
         'G: 240-242, 233-238'
       ]},
-      {id: 's2', lat: 51.494869, lon: 0.076202, label: 'S2', info: 'Southern 2', serves: [
+      {id: 's2', lat: 51.494867204672595, lon: 0.07617806656546598, label: 'S2', info: 'Southern 2', serves: [
         '2: 253, 254',
         '1: 247, 248',
         'G: 243-246, 228-232'
       ]},
-      {id: 1, lat: 51.4950224, lon: 0.0749889, label: '1', info: 'Entrance 1', serves: ['1-96']},
-      {id: 2, lat: 51.4953042, lon: 0.0748246, label: '2', info: 'Entrance 2', serves: ['1-96']},
-      {id: 3, lat: 51.4955707, lon: 0.0752172, label: '3', info: 'Entrance 3', serves: [
-        '112-113', '109-111', '106-108', '103-105', '100-102', '97-99', 'Car Park'
+      {id: 1, lat: 51.49502465297843, lon: 0.07498103026838271, label: '1', info: 'Entrance 1', serves: [
+        '6: 91–93',
+        '5: 81–84, 90',
+        '4: 65–70, 79, 80',
+        '3: 49–54, 63, 64',
+        '2: 33–38, 47, 48',
+        '1: 17–22, 31, 32',
+        'G: 9–16',
+        'B: Car Park'
       ]},
-      {id: 4, lat: 51.4956673, lon: 0.0754844, label: '4', info: 'Entrance 4', serves: [
-        '129-130', '126-128', '123-125', '120-122', '117-119', '114-116', 'Car Park'
+      {id: 2, lat: 51.49531540607916, lon: 0.07485458277281538, label: '2', info: 'Entrance 2', serves: [
+        '6: 94–96',
+        '5: 85–89',
+        '4: 71–78',
+        '3: 55–62',
+        '2: 39–46',
+        '1: 23–30',
+        'G: 1–8',
+        'B: Car Park'
       ]},
-      {id: 5, lat: 51.4955027, lon: 0.0759628, label: '5', info: 'Entrance 5', serves: [
-        '131-146', '147-162', '163-178', '179-194', '195-210', '211-220', '221-226', 'Car Park'
+      {id: 3, lat: 51.49557361847723, lon: 0.07521706559772619, label: '3', info: 'Entrance 3', serves: [
+        '5: 112–113',
+        '4: 109–111',
+        '3: 106–108',
+        '2: 103–105',
+        '1: 100–102',
+        'G: 97–99',
+        'B: Car Park'
       ]},
-      {id: 6, lat: 51.4951975, lon: 0.0760879, label: '6', info: 'Entrance 6', serves: [
-        '131-146', '147-162', '163-178', '179-194', '195-210', '211-220', '221-226', 'Car Park'
+      {id: 4, lat: 51.49560720697334, lon: 0.0754514149561776, label: '4', info: 'Entrance 4', serves: [
+        '5: 129–130',
+        '4: 126–128',
+        '3: 123–125',
+        '2: 120–122',
+        '1: 117–119',
+        'G: 114–116',
+        'B: Car Park'
       ]},
-      {id: 8, lat: 51.4949996, lon: 0.0760259, label: '8', info: 'Entrance 8', serves: [
-        '227', '255-258', '267-269', '270', '271-276', '277-280', '291-296', '307-310', '311-314', '321', '322'
+      {id: 5, lat: 51.495498044267784, lon: 0.07595720495272858, label: '5', info: 'Entrance 5', serves: [
+        '6: 221–226',
+        '5: 211–220',
+        '4: 195–210',
+        '3: 179–194',
+        '2: 163–178',
+        '1: 147–162',
+        'G: 131–146',
+        'B: Car Park'
       ]},
-      {id: 9, lat: 51.4948332, lon: 0.0752681, label: '9', info: 'Entrance 9', serves: ['239', '259-266', '281-290', '298-306', '315-320']},
+      {id: 6, lat: 51.495203093730154, lon: 0.07609039631544023, label: '6', info: 'Entrance 6', serves: [
+        '6: 221–226',
+        '5: 211–220',
+        '4: 195–210',
+        '3: 179–194',
+        '2: 163–178',
+        '1: 147–162',
+        'G: 131–146',
+        'B: Car Park'
+      ]},
+      {id: 8, lat: 51.49497217027241, lon: 0.07600104008523932, label: '8', info: 'Entrance 8', serves: [
+        '5: 321, 322, 311–314',
+        '4: 307–310, 291–296',
+        '3: 277–280, 271–276',
+        '2: 267–269, 255–258, 270',
+        'G: 227',
+        'B: Car Park'
+      ]},
+      {id: 9, lat: 51.49484516186698, lon: 0.07525078493130564, label: '9', info: 'Entrance 9', serves: [
+        '5: 315–320',
+        '4: 297–306',
+        '3: 281–290',
+        '2: 259–266',
+        'G: 239',
+        'B: Car Park'
+      ]},
     ];
 
     // Apartment to entrance mapping (update as needed for S1/S2)
     function getEntranceForApt(apt) {
-      // Accept both string and number input
       if (typeof apt === 'string') apt = apt.trim().toUpperCase();
+
       // S2: 228-232, 243-246, 247, 248, 253, 254
       if (
         apt === 'S2' ||
@@ -201,43 +257,132 @@
         ))
       ) return 's2';
 
-      // 9: 239, 259-266, 281-290, 298-306, 315-320
+      // S1: 233-238, 240-242, 249, 250, 251, 252
+      if (
+        apt === 'S1' ||
+        (typeof apt === 'number' && (
+          (apt >= 233 && apt <= 238) ||
+          (apt >= 240 && apt <= 242) ||
+          [249, 250, 251, 252].includes(apt)
+        ))
+      ) return 's1';
+
+      // 9: 239, 259-266, 281-290, 297-306, 315-320
       if (
         apt === 9 ||
         (typeof apt === 'number' && (
           apt === 239 ||
           (apt >= 259 && apt <= 266) ||
           (apt >= 281 && apt <= 290) ||
-          (apt >= 298 && apt <= 306) ||
+          (apt >= 297 && apt <= 306) ||
           (apt >= 315 && apt <= 320)
         ))
       ) return 9;
 
-      // 8: 227, 270, 255-258, 267-269, 271-276, 277, 296, 307-310, 311-314, 321-322
+      // 8: 227, 255-258, 267-269, 270, 271-276, 277-280, 291-296, 307-310, 311-314, 321, 322
       if (
         apt === 8 ||
         (typeof apt === 'number' && (
           apt === 227 ||
-          apt === 270 ||
           (apt >= 255 && apt <= 258) ||
           (apt >= 267 && apt <= 269) ||
+          apt === 270 ||
           (apt >= 271 && apt <= 276) ||
-          apt === 277 ||
-          apt === 296 ||
+          (apt >= 277 && apt <= 280) ||
+          (apt >= 291 && apt <= 296) ||
           (apt >= 307 && apt <= 310) ||
           (apt >= 311 && apt <= 314) ||
-          (apt >= 321 && apt <= 322)
+          apt === 321 ||
+          apt === 322
         ))
       ) return 8;
 
-      // 1: 1-96 (core 1 or 2)
-      if (apt === 1 || apt === 2 || (typeof apt === 'number' && apt >= 1 && apt <= 96)) return [1,2];
-      // 3: 97-113
-      if (apt === 3 || (typeof apt === 'number' && apt >= 97 && apt <= 113)) return 3;
-      // 4: 114-130
-      if (apt === 4 || (typeof apt === 'number' && apt >= 114 && apt <= 130)) return 4;
-      // 5: 131-226 (core 5 or 6)
-      if (apt === 5 || apt === 6 || (typeof apt === 'number' && apt >= 131 && apt <= 226)) return [5,6];
+      // 6: 131-146 (G), 147-162 (1), 163-178 (2), 179-194 (3), 195-210 (4), 211-220 (5), 221-226 (6)
+      if (
+        apt === 6 ||
+        (typeof apt === 'number' && (
+          (apt >= 131 && apt <= 146) ||
+          (apt >= 147 && apt <= 162) ||
+          (apt >= 163 && apt <= 178) ||
+          (apt >= 179 && apt <= 194) ||
+          (apt >= 195 && apt <= 210) ||
+          (apt >= 211 && apt <= 220) ||
+          (apt >= 221 && apt <= 226)
+        ))
+      ) return [5,6]; // Both 5 and 6 serve these flats
+
+      // 5: 131-146 (G), 147-162 (1), 163-178 (2), 179-194 (3), 195-210 (4), 211-220 (5), 221-226 (6)
+      if (
+        apt === 5 ||
+        (typeof apt === 'number' && (
+          (apt >= 131 && apt <= 146) ||
+          (apt >= 147 && apt <= 162) ||
+          (apt >= 163 && apt <= 178) ||
+          (apt >= 179 && apt <= 194) ||
+          (apt >= 195 && apt <= 210) ||
+          (apt >= 211 && apt <= 220) ||
+          (apt >= 221 && apt <= 226)
+        ))
+      ) return [5,6];
+
+      // 4: 114-116 (G), 117-119 (1), 120-122 (2), 123-125 (3), 126-128 (4), 129-130 (5)
+      if (
+        apt === 4 ||
+        (typeof apt === 'number' && (
+          (apt >= 114 && apt <= 116) ||
+          (apt >= 117 && apt <= 119) ||
+          (apt >= 120 && apt <= 122) ||
+          (apt >= 123 && apt <= 125) ||
+          (apt >= 126 && apt <= 128) ||
+          (apt >= 129 && apt <= 130)
+        ))
+      ) return 4;
+
+      // 3: 97-99 (G), 100-102 (1), 103-105 (2), 106-108 (3), 109-111 (4), 112-113 (5)
+      if (
+        apt === 3 ||
+        (typeof apt === 'number' && (
+          (apt >= 97 && apt <= 99) ||
+          (apt >= 100 && apt <= 102) ||
+          (apt >= 103 && apt <= 105) ||
+          (apt >= 106 && apt <= 108) ||
+          (apt >= 109 && apt <= 111) ||
+          (apt >= 112 && apt <= 113)
+        ))
+      ) return 3;
+
+      // 2: 1-8 (G), 23-30 (1), 39-46 (2), 55-62 (3), 71-78 (4), 85-89 (5), 94-96 (6)
+      if (
+        apt === 2 ||
+        (typeof apt === 'number' && (
+          (apt >= 1 && apt <= 8) ||
+          (apt >= 23 && apt <= 30) ||
+          (apt >= 39 && apt <= 46) ||
+          (apt >= 55 && apt <= 62) ||
+          (apt >= 71 && apt <= 78) ||
+          (apt >= 85 && apt <= 89) ||
+          (apt >= 94 && apt <= 96)
+        ))
+      ) return 2;
+
+      // 1: 9-16 (G), 17-22 (1), 31-32 (1), 33-38 (2), 47-48 (2), 49-54 (3), 63-64 (3), 65-70 (4), 79-80 (4), 81-84 (5), 90 (5), 91-93 (6)
+      if (
+        apt === 1 ||
+        (typeof apt === 'number' && (
+          (apt >= 9 && apt <= 16) ||
+          (apt >= 17 && apt <= 22) ||
+          (apt >= 31 && apt <= 32) ||
+          (apt >= 33 && apt <= 38) ||
+          (apt >= 47 && apt <= 48) ||
+          (apt >= 49 && apt <= 54) ||
+          (apt >= 63 && apt <= 64) ||
+          (apt >= 65 && apt <= 70) ||
+          (apt >= 79 && apt <= 80) ||
+          (apt >= 81 && apt <= 84) ||
+          apt === 90 ||
+          (apt >= 91 && apt <= 93)
+        ))
+      ) return 1;
 
       return null;
     }
@@ -312,97 +457,17 @@
 
         // Floor breakdown (apartments per floor)
         if (showServed && e.serves && e.serves.length > 0) {
-          if (e.id === 's2') {
-            html += `<br><b>Serves apartments:</b><br>`;
-            html += `<span style=\"color:#1976d2\">`;
-            e.serves.forEach(floor => {
-              const match = floor.match(/^([\dG]): (.+)$/);
-              if (match) {
-                html += `<b>${match[1]}:</b> ${match[2]}<br>`;
-              }
-            });
-            html += `</span>`;
-          } else if (e.id === 's1') {
-            html += `<br><b>Serves apartments:</b><br>`;
-            html += `<span style=\"color:#1976d2\">`;
-            e.serves.forEach(floor => {
-              const match = floor.match(/^(\d|G): (.+)$/);
-              if (match) {
-                html += `<b>${match[1]}:</b> ${match[2]}<br>`;
-              }
-            });
-            html += `</span>`;
-          } else if (e.id === 8) {
-            html += `<br><b>Serves apartments:</b><br>`;
-            html += `<span style=\"color:#1976d2\">
-              <b>5:</b> 321, 322, 311–314<br>
-              <b>4:</b> 307–310, 291–296<br>
-              <b>3:</b> 277–280, 271–276<br>
-              <b>2:</b> 267–269, 255–258, 270<br>
-              <b>G:</b> 227
-            </span>`;
-          } else if (e.id === 6 || e.id === 5) {
-            html += `<br><b>Serves apartments:</b><br>`;
-            html += `<span style=\"color:#1976d2\">
-              <b>6:</b> 221–226<br>
-              <b>5:</b> 211–220<br>
-              <b>4:</b> 195–210<br>
-              <b>3:</b> 179–194<br>
-              <b>2:</b> 163–178<br>
-              <b>1:</b> 147–162<br>
-              <b>G:</b> 131–146<br>
-              <b>B:</b> Car Park
-            </span>`;
-          } else if (e.id === 4) {
-            html += `<br><b>Serves apartments:</b><br>`;
-            html += `<span style=\"color:#1976d2\">
-              <b>5:</b> 129–130<br>
-              <b>4:</b> 126–128<br>
-              <b>3:</b> 123–125<br>
-              <b>2:</b> 120–122<br>
-              <b>1:</b> 117–119<br>
-              <b>G:</b> 114–116<br>
-              <b>B:</b> Car Park
-            </span>`;
-          } else if (e.id === 3) {
-            html += `<br><b>Serves apartments:</b><br>`;
-            html += `<span style=\"color:#1976d2\">\n    <b>5:</b> 112–113<br>\n    <b>4:</b> 109–111<br>\n    <b>3:</b> 106–108<br>\n    <b>2:</b> 103–105<br>\n    <b>1:</b> 100–102<br>\n    <b>G:</b> 97–99<br>\n    <b>B:</b> Car Park\n  </span>`;
-          } else if (e.id === 2) {
-            html += `<br><b>Serves apartments:</b><br>`;
-            html += `<span style=\"color:#1976d2\">
-              <b>6:</b> 94–96<br>
-              <b>5:</b> 85–89<br>
-              <b>4:</b> 71–78<br>
-              <b>3:</b> 55–62<br>
-              <b>2:</b> 39–46<br>
-              <b>1:</b> 23–30<br>
-              <b>G:</b> 1–8<br>
-              <b>B:</b> Car Park
-            </span>`;
-          } else if (e.id === 1) {
-            html += `<br><b>Serves apartments:</b><br>`;
-            html += `<span style=\"color:#1976d2\">
-              <b>6:</b> 91–93<br>
-              <b>5:</b> 81–84, 90<br>
-              <b>4:</b> 65–70, 79, 80<br>
-              <b>3:</b> 49–54, 63, 64<br>
-              <b>2:</b> 33–38, 47, 48<br>
-              <b>1:</b> 17–22, 31, 32<br>
-              <b>G:</b> 9–16<br>
-              <b>B:</b> Car Park
-            </span>`;
-          } else if (e.id === 9) {
-            html += `<br><b>Serves apartments:</b><br>`;
-            html += `<span style=\"color:#1976d2\">
-              <b>5:</b> 315–320<br>
-              <b>4:</b> 297–306<br>
-              <b>3:</b> 281–290<br>
-              <b>2:</b> 259–266<br>
-              <b>G:</b> 239
-            </span>`;
-          } else {
-            html += `<br><b>Serves apartments:</b> <span style=\"color:#1976d2\">${e.serves.join(', ')}</span>`;
-          }
+          html += `<br><b>Serves apartments:</b><br>`;
+          html += `<span style=\"color:#1976d2\">`;
+          e.serves.forEach(floor => {
+            const match = floor.match(/^([\dGB]): (.+)$/);
+            if (match) {
+              html += `<b>${match[1]}:</b> ${match[2]}<br>`;
+            } else {
+              html += `${floor}<br>`;
+            }
+          });
+          html += `</span>`;
         }
 
         // Images (move up, less margin)
