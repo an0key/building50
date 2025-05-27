@@ -163,7 +163,9 @@
       ]},
       {id: 1, lat: 51.494922, lon: 0.075011, label: '1', info: 'Entrance 1', serves: ['1-96']},
       {id: 2, lat: 51.495178, lon: 0.074885, label: '2', info: 'Entrance 2', serves: ['1-96']},
-      {id: 3, lat: 51.495507, lon: 0.075035, label: '3', info: 'Entrance 3', serves: ['97-113']},
+      {id: 3, lat: 51.4955707, lon: 0.0752172, label: '3', info: 'Entrance 3', serves: [
+        '112–113', '109–111', '106–108', '103–105', '100–102', '97–99', 'Car Park'
+      ]},
       {id: 4, lat: 51.4956673, lon: 0.0754844, label: '4', info: 'Entrance 4', serves: [
         '129-130', '126-128', '123-125', '120-122', '117-119', '114-116', 'Car Park'
       ]},
@@ -328,6 +330,9 @@
               <b>G:</b> 114–116<br>
               <b>B:</b> Car Park
             </span>`;
+          } else if (e.id === 3) {
+            html += `<br><b>Serves apartments:</b><br>`;
+            html += `<span style=\"color:#1976d2\">\n              <b>5:</b> 112–113<br>\n              <b>4:</b> 109–111<br>\n              <b>3:</b> 106–108<br>\n              <b>2:</b> 103–105<br>\n              <b>1:</b> 100–102<br>\n              <b>G:</b> 97–99<br>\n              <b>B:</b> Car Park\n            </span>`;
           } else {
             html += `<br><b>Serves apartments:</b> <span style=\"color:#1976d2\">${e.serves.join(', ')}</span>`;
           }
