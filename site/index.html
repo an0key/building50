@@ -231,62 +231,178 @@
         '4: 307–310, 291–296',
         '3: 277–280, 271–276',
         '2: 267–269, 255–258, 270',
-        'G: 227',
-        'B: Car Park'
+        'G: 227'
       ]},
-      {id: 9, lat: 51.49484516186698, lon: 0.07525078493130564, label: '9', info: 'Entrance 9', serves: [
-        '5: 315–320',
-        '4: 297–306',
-        '3: 281–290',
-        '2: 259–266',
-        'G: 239',
-        'B: Car Park'
-      ]},
+      {id: 9, lat: 51.49484516186698, lon: 0.07525078493130564, label: '9', info: 'Entrance 9', serves: ['239', '259-266', '281-290', '298-306', '315-320']},
     ];
 
-    // Build a mapping from apartment number to entrance id
-    const aptToEntrance = (() => {
-      const map = {};
-      // Helper to parse ranges and lists like "81–84, 90"
-      function parseAptList(str) {
-        return str.split(',').flatMap(part => {
-          part = part.trim().replace(/–/g, '-');
-          if (/^\d+-\d+$/.test(part)) {
-            const [start, end] = part.split('-').map(Number);
-            return Array.from({length: end - start + 1}, (_, i) => start + i);
-          } else if (/^\d+$/.test(part)) {
-            return [Number(part)];
-          } else {
-            return [];
-          }
-        });
-      }
-      entrances.forEach(e => {
-        if (!e.serves) return;
-        e.serves.forEach(floor => {
-          // Match "X: ..." or just "..." (for S1/S2/8/9)
-          const match = floor.match(/^[\dGB]+:\s*(.+)$/);
-          if (match) {
-            parseAptList(match[1]).forEach(apt => {
-              map[apt] = e.id;
-            });
-          } else {
-            // For entries like "239" or "259-266"
-            parseAptList(floor).forEach(apt => {
-              map[apt] = e.id;
-            });
-          }
-        });
-      });
-      return map;
-    })();
-
+    // Apartment to entrance mapping (update as needed for S1/S2)
     function getEntranceForApt(apt) {
+      // Accept both string and number input
       if (typeof apt === 'string') apt = apt.trim().toUpperCase();
-      if (typeof apt === 'number' && aptToEntrance[apt]) return aptToEntrance[apt];
-      // Allow string input for S1/S2
-      if (apt === 'S1' || apt === 'S2') return apt.toLowerCase();
+      // S2: 228-232, 243-246, 247, 248, 253, 254
+      if (
+        apt === 'S2' ||
+        (typeof apt === 'number' && (
+          (apt >= 228 && apt <= 232) ||
+          (apt >= 243 && apt <= 246) ||
+          [247, 248, 253, 254].includes(apt)
+        ))
+      ) return 's2';
+
+      // 9: 239, 259-266, 281-290, 298-306, 315-320
+      if (
+        apt === 9 ||
+        (typeof apt === 'number' && (
+          apt === 239 ||
+          (apt >= 259 && apt <= 266) ||
+          (apt >= 281 && apt <= 290) ||
+          (apt >= 298 && apt <= 306) ||
+          (apt >= 315 && apt <= 320)
+        ))
+      ) return 9;
+
+      // 8: 227, 270, 255-258, 267-269, 271-276, 277, 296, 307-310, 311-314, 321-322
+      if (
+        apt === 8 ||
+        (typeof apt === 'number' && (
+          apt === 227 ||
+          apt === 270 ||
+          (apt >= 255 && apt <= 258) ||
+          (apt >= 267 && apt <= 269) ||
+          (apt >= 271 && apt <= 276) ||
+          apt === 277 ||
+          apt === 296 ||
+          (apt >= 307 && apt <= 310) ||
+          (apt >= 311 && apt <= 314) ||
+          (apt >= 321 && apt <= 322)
+        ))
+      ) return 8;
+
+      // 1: 1-96 (core 1 or 2)
+      if (apt === 1 || apt === 2 || (typeof apt === 'number' && apt >= 1 && apt <= 96)) return [1,2];
+      // 3: 97-113
+      if (apt === 3 || (typeof apt === 'number' && apt >= 97 && apt <= 113)) return 3;
+      // 4: 114-130
+      if (apt === 4 || (typeof apt === 'number' && apt >= 114 && apt <= 130)) return 4;
+      // 5: 131-226 (core 5 or 6)
+      if (apt === 5 || apt === 6 || (typeof apt === 'number' && apt >= 131 && apt <= 226)) return [5,6];
+
       return null;
+    }
+
+    // Initialize Leaflet map (fit to all entrances)
+    const map = L.map('map');
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 20,
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Store marker references
+    const entranceMarkers = [];
+    const markerLatLngs = [];
+
+    entrances.forEach(e => {
+      // Custom HTML marker with number/label
+      const icon = L.divIcon({
+        className: 'custom-marker',
+        html: `<span>${e.label}</span>`,
+        iconSize: [22, 22],
+        iconAnchor: [11, 11],
+      });
+      const marker = L.marker([e.lat, e.lon], {icon}).addTo(map);
+      marker._entranceId = e.id;
+      marker._entranceInfo = e.info;
+      marker.on('click', function() {
+        showEntranceInfo(e, true);
+        highlightEntrance(e.id);
+      });
+      entranceMarkers.push(marker);
+      markerLatLngs.push([e.lat, e.lon]);
+    });
+
+    // Fit map to show all entrances
+    if (markerLatLngs.length > 0) {
+      map.fitBounds(markerLatLngs, {padding: [40, 40], maxZoom: 18});
+    } else {
+      map.setView([centerLat, centerLon], 18);
+    }
+
+    function highlightEntrance(entranceIds) {
+      // Accept single id or array
+      let ids = Array.isArray(entranceIds) ? entranceIds : (entranceIds ? [entranceIds] : []);
+      entranceMarkers.forEach((marker, idx) => {
+        const iconEl = marker.getElement();
+        if (!iconEl) return;
+        if (ids.includes(entrances[idx].id)) {
+          iconEl.classList.add('active');
+        } else {
+          iconEl.classList.remove('active');
+        }
+      });
+    }
+
+    function showEntranceInfo(entrancesArr, showServed=false) {
+      const infoDiv = document.getElementById('entrance-info');
+      let html = '';
+      if (!Array.isArray(entrancesArr)) entrancesArr = [entrancesArr];
+      entrancesArr.forEach((e, idx) => {
+        if (idx > 0) html += '<hr style="margin:0.5em 0">';
+        // Entrance name and coordinates
+        html += `<b>${e.info}</b> <span style="color:#888;font-size:0.97em;">(${e.lat.toFixed(6)}, ${e.lon.toFixed(6)})</span>`;
+
+        // Notes about concealed/unlabelled entrances (directly under name/coords)
+        if (e.id === 8 || e.id === 9) {
+          html += `<br><span style=\"color:#e53935;font-weight:bold;display:block;margin-top:0.2em;\">The entrance and intercom are concealed, up a small footpath.</span>`;
+        }
+        if (e.id === 's1' || e.id === 's2') {
+          html += `<br><span style=\"color:#e53935;font-weight:bold;display:block;margin-top:0.2em;\">Note: The entrance numbers are not printed on these doors.</span>`;
+        }
+
+        // Floor breakdown (apartments per floor)
+        if (showServed && e.serves && e.serves.length > 0) {
+          html += `<br><b>Serves apartments:</b><br>`;
+          html += `<span style=\"color:#1976d2\">`;
+          e.serves.forEach(floor => {
+            const match = floor.match(/^([\dGB]): (.+)$/);
+            if (match) {
+              html += `<b>${match[1]}:</b> ${match[2]}<br>`;
+            } else {
+              html += `${floor}<br>`;
+            }
+          });
+          html += `</span>`;
+        }
+
+        // Images (move up, less margin)
+        let prefix =
+          e.id === 's2' ? 'S2'
+          : e.id === 's1' ? 'S1'
+          : e.id === 9 ? '9'
+          : e.id === 8 ? '8'
+          : e.id === 6 ? '6'
+          : e.id === 5 ? '5'
+          : e.id === 4 ? '4'
+          : e.id === 3 ? '3'
+          : e.id === 2 ? '2'
+          : e.id === 1 ? '1'
+          : e.id;
+
+        html += `<div class=\"s2-image-row\" style=\"margin-top:0.5em;margin-bottom:0.7em;\">`;
+        // Entrance image for 8 and 9 only
+        if (e.id === 8) {
+          html += `<div class=\"s2-image-thumb\"><a href=\"/images/core/8-Entrance.jpeg\" target=\"_blank\" rel=\"noopener\"><img src=\"/images/core/8-Entrance.jpeg\" alt=\"8 Entrance\"></a><br><span>Entrance</span></div>`;
+        } else if (e.id === 9) {
+          html += `<div class=\"s2-image-thumb\"><a href=\"/images/core/9-Enterance.jpeg\" target=\"_blank\" rel=\"noopener\"><img src=\"/images/core/9-Enterance.jpeg\" alt=\"9 Entrance\"></a><br><span>Entrance</span></div>`;
+        }
+        // External image for all
+        html += `<div class=\"s2-image-thumb\"><a href=\"/images/core/${prefix}-External.jpeg\" target=\"_blank\" rel=\"noopener\"><img src=\"/images/core/${prefix}-External.jpeg\" alt=\"${prefix} External\"></a><br><span>External</span></div>`;
+        // Floors image for all
+        html += `<div class=\"s2-image-thumb\"><a href=\"/images/core/${prefix}-Floors.jpeg\" target=\"_blank\" rel=\"noopener\"><img src=\"/images/core/${prefix}-Floors.jpeg\" alt=\"${prefix} Floors\"></a><br><span>Floors</span></div>`;
+        html += `</div>`;
+      });
+      infoDiv.innerHTML = html;
+      infoDiv.style.display = 'block';
     }
 
     // Helper to get floor for a given apt and entrance
@@ -295,10 +411,8 @@
       for (const floor of entranceObj.serves) {
         const match = floor.match(/^([\dGB]): (.+)$/);
         if (match) {
-          // e.g. "3: 49–54, 63, 64"
           const floorLabel = match[1];
           const flats = match[2];
-          // Parse ranges and singles
           const nums = flats.split(',').flatMap(part => {
             part = part.trim().replace(/–/g, '-');
             if (/^\d+-\d+$/.test(part)) {
@@ -338,7 +452,6 @@
       // Info message logic
       let aptNum = parseInt(document.getElementById('apt-input').value, 10);
       if (!isNaN(aptNum) && foundEntrances.length > 0) {
-        // If multiple entrances, show both
         let msg = '';
         foundEntrances.forEach((enObj, idx) => {
           if (idx > 0) msg += ' / ';
