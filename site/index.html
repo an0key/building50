@@ -456,9 +456,9 @@
         foundEntrances.forEach((enObj, idx) => {
           if (idx > 0) msg += ' / ';
           let floor = getFloorForApt(aptNum, enObj);
-          msg += `Apartment ${aptNum} is served by entrance <b>${enObj.label}</b>`;
+          msg += `Apartment ${aptNum} is accessed via Core/Entrance <b>${enObj.label}</b>`;
           if (floor) {
-            msg += ` on floor <b>${floor}</b>`;
+            msg += `, and is on Floor <b>${floor}</b>`;
           }
         });
         infoMsgDiv.innerHTML = msg;
