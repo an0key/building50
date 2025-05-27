@@ -243,147 +243,48 @@
       ]},
     ];
 
-    // Apartment to entrance mapping (update as needed for S1/S2)
+    // Build a mapping from apartment number to entrance id
+    const aptToEntrance = (() => {
+      const map = {};
+      // Helper to parse ranges and lists like "81–84, 90"
+      function parseAptList(str) {
+        return str.split(',').flatMap(part => {
+          part = part.trim().replace(/–/g, '-');
+          if (/^\d+-\d+$/.test(part)) {
+            const [start, end] = part.split('-').map(Number);
+            return Array.from({length: end - start + 1}, (_, i) => start + i);
+          } else if (/^\d+$/.test(part)) {
+            return [Number(part)];
+          } else {
+            return [];
+          }
+        });
+      }
+      entrances.forEach(e => {
+        if (!e.serves) return;
+        e.serves.forEach(floor => {
+          // Match "X: ..." or just "..." (for S1/S2/8/9)
+          const match = floor.match(/^[\dGB]+:\s*(.+)$/);
+          if (match) {
+            parseAptList(match[1]).forEach(apt => {
+              map[apt] = e.id;
+            });
+          } else {
+            // For entries like "239" or "259-266"
+            parseAptList(floor).forEach(apt => {
+              map[apt] = e.id;
+            });
+          }
+        });
+      });
+      return map;
+    })();
+
     function getEntranceForApt(apt) {
       if (typeof apt === 'string') apt = apt.trim().toUpperCase();
-
-      // S2: 228-232, 243-246, 247, 248, 253, 254
-      if (
-        apt === 'S2' ||
-        (typeof apt === 'number' && (
-          (apt >= 228 && apt <= 232) ||
-          (apt >= 243 && apt <= 246) ||
-          [247, 248, 253, 254].includes(apt)
-        ))
-      ) return 's2';
-
-      // S1: 233-238, 240-242, 249, 250, 251, 252
-      if (
-        apt === 'S1' ||
-        (typeof apt === 'number' && (
-          (apt >= 233 && apt <= 238) ||
-          (apt >= 240 && apt <= 242) ||
-          [249, 250, 251, 252].includes(apt)
-        ))
-      ) return 's1';
-
-      // 9: 239, 259-266, 281-290, 297-306, 315-320
-      if (
-        apt === 9 ||
-        (typeof apt === 'number' && (
-          apt === 239 ||
-          (apt >= 259 && apt <= 266) ||
-          (apt >= 281 && apt <= 290) ||
-          (apt >= 297 && apt <= 306) ||
-          (apt >= 315 && apt <= 320)
-        ))
-      ) return 9;
-
-      // 8: 227, 255-258, 267-269, 270, 271-276, 277-280, 291-296, 307-310, 311-314, 321, 322
-      if (
-        apt === 8 ||
-        (typeof apt === 'number' && (
-          apt === 227 ||
-          (apt >= 255 && apt <= 258) ||
-          (apt >= 267 && apt <= 269) ||
-          apt === 270 ||
-          (apt >= 271 && apt <= 276) ||
-          (apt >= 277 && apt <= 280) ||
-          (apt >= 291 && apt <= 296) ||
-          (apt >= 307 && apt <= 310) ||
-          (apt >= 311 && apt <= 314) ||
-          apt === 321 ||
-          apt === 322
-        ))
-      ) return 8;
-
-      // 6: 131-146 (G), 147-162 (1), 163-178 (2), 179-194 (3), 195-210 (4), 211-220 (5), 221-226 (6)
-      if (
-        apt === 6 ||
-        (typeof apt === 'number' && (
-          (apt >= 131 && apt <= 146) ||
-          (apt >= 147 && apt <= 162) ||
-          (apt >= 163 && apt <= 178) ||
-          (apt >= 179 && apt <= 194) ||
-          (apt >= 195 && apt <= 210) ||
-          (apt >= 211 && apt <= 220) ||
-          (apt >= 221 && apt <= 226)
-        ))
-      ) return [5,6]; // Both 5 and 6 serve these flats
-
-      // 5: 131-146 (G), 147-162 (1), 163-178 (2), 179-194 (3), 195-210 (4), 211-220 (5), 221-226 (6)
-      if (
-        apt === 5 ||
-        (typeof apt === 'number' && (
-          (apt >= 131 && apt <= 146) ||
-          (apt >= 147 && apt <= 162) ||
-          (apt >= 163 && apt <= 178) ||
-          (apt >= 179 && apt <= 194) ||
-          (apt >= 195 && apt <= 210) ||
-          (apt >= 211 && apt <= 220) ||
-          (apt >= 221 && apt <= 226)
-        ))
-      ) return [5,6];
-
-      // 4: 114-116 (G), 117-119 (1), 120-122 (2), 123-125 (3), 126-128 (4), 129-130 (5)
-      if (
-        apt === 4 ||
-        (typeof apt === 'number' && (
-          (apt >= 114 && apt <= 116) ||
-          (apt >= 117 && apt <= 119) ||
-          (apt >= 120 && apt <= 122) ||
-          (apt >= 123 && apt <= 125) ||
-          (apt >= 126 && apt <= 128) ||
-          (apt >= 129 && apt <= 130)
-        ))
-      ) return 4;
-
-      // 3: 97-99 (G), 100-102 (1), 103-105 (2), 106-108 (3), 109-111 (4), 112-113 (5)
-      if (
-        apt === 3 ||
-        (typeof apt === 'number' && (
-          (apt >= 97 && apt <= 99) ||
-          (apt >= 100 && apt <= 102) ||
-          (apt >= 103 && apt <= 105) ||
-          (apt >= 106 && apt <= 108) ||
-          (apt >= 109 && apt <= 111) ||
-          (apt >= 112 && apt <= 113)
-        ))
-      ) return 3;
-
-      // 2: 1-8 (G), 23-30 (1), 39-46 (2), 55-62 (3), 71-78 (4), 85-89 (5), 94-96 (6)
-      if (
-        apt === 2 ||
-        (typeof apt === 'number' && (
-          (apt >= 1 && apt <= 8) ||
-          (apt >= 23 && apt <= 30) ||
-          (apt >= 39 && apt <= 46) ||
-          (apt >= 55 && apt <= 62) ||
-          (apt >= 71 && apt <= 78) ||
-          (apt >= 85 && apt <= 89) ||
-          (apt >= 94 && apt <= 96)
-        ))
-      ) return 2;
-
-      // 1: 9-16 (G), 17-22 (1), 31-32 (1), 33-38 (2), 47-48 (2), 49-54 (3), 63-64 (3), 65-70 (4), 79-80 (4), 81-84 (5), 90 (5), 91-93 (6)
-      if (
-        apt === 1 ||
-        (typeof apt === 'number' && (
-          (apt >= 9 && apt <= 16) ||
-          (apt >= 17 && apt <= 22) ||
-          (apt >= 31 && apt <= 32) ||
-          (apt >= 33 && apt <= 38) ||
-          (apt >= 47 && apt <= 48) ||
-          (apt >= 49 && apt <= 54) ||
-          (apt >= 63 && apt <= 64) ||
-          (apt >= 65 && apt <= 70) ||
-          (apt >= 79 && apt <= 80) ||
-          (apt >= 81 && apt <= 84) ||
-          apt === 90 ||
-          (apt >= 91 && apt <= 93)
-        ))
-      ) return 1;
-
+      if (typeof apt === 'number' && aptToEntrance[apt]) return aptToEntrance[apt];
+      // Allow string input for S1/S2
+      if (apt === 'S1' || apt === 'S2') return apt.toLowerCase();
       return null;
     }
 
