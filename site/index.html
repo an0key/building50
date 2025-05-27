@@ -42,9 +42,9 @@
     display: block;
     margin-top: 0.3em;
   }
-    body { font-family: sans-serif; margin: 2em; background: #f9f9f9; }
-    .container { max-width: 600px; margin: auto; background: #fff; padding: 2em; border-radius: 8px; box-shadow: 0 2px 8px #0001; }
-    h1 { text-align: center; color: #111; }
+    body { font-family: sans-serif; margin: 0.5em 0 1.2em 0; background: #f9f9f9; }
+    .container { max-width: 600px; margin: 0.5em auto 0 auto; background: #fff; padding: 1.1em 1em 1.5em 1em; border-radius: 8px; box-shadow: 0 2px 8px #0001; }
+    h1 { text-align: center; color: #111; margin-top: 0.2em; margin-bottom: 0.5em; font-size: 2em; }
     .map-container { position: relative; margin: 2em 0; }
     .leaflet-container { font-family: inherit; }
     .entrance-label {
@@ -144,7 +144,7 @@
               iconAnchor: [11, 11],
             })
           }).addTo(map);
-      userLocationMarker.bindTooltip('Apartment location', {permanent: false, direction: 'top'}).openTooltip();
+      userLocationMarker.bindTooltip('My Location', {permanent: false, direction: 'top'}).openTooltip();
           map.setView([lat, lon], 18);
         }, function(err) {
           errorSpan.textContent = 'Unable to get your location.';
@@ -157,14 +157,20 @@
 
     // Updated entrance coordinates and info
     const entrances = [
-      {id: 's1', lat: 51.494678, lon: 0.075134, label: 'S1', info: 'Southern 1', serves: []},
-      {id: 's2', lat: 51.494869, lon: 0.076202, label: 'S2', info: 'Southern 2', serves: [
-        '228-232', '233-238', '240-242', '243-246', '247', '248', '249', '250', '251', '252', '253', '254'
+      {id: 's1', lat: 51.4946957, lon: 0.0751796, label: 'S1', info: 'Southern 1', serves: [
+        '2: 251, 252',
+        '1: 249, 250',
+        'G: 240-242, 233-238'
       ]},
-      {id: 1, lat: 51.494922, lon: 0.075011, label: '1', info: 'Entrance 1', serves: ['1-96']},
-      {id: 2, lat: 51.495178, lon: 0.074885, label: '2', info: 'Entrance 2', serves: ['1-96']},
+      {id: 's2', lat: 51.494869, lon: 0.076202, label: 'S2', info: 'Southern 2', serves: [
+        '2: 253, 254',
+        '1: 247, 248',
+        'G: 243-246, 228-232'
+      ]},
+      {id: 1, lat: 51.4950224, lon: 0.0749889, label: '1', info: 'Entrance 1', serves: ['1-96']},
+      {id: 2, lat: 51.4953042, lon: 0.0748246, label: '2', info: 'Entrance 2', serves: ['1-96']},
       {id: 3, lat: 51.4955707, lon: 0.0752172, label: '3', info: 'Entrance 3', serves: [
-        '112–113', '109–111', '106–108', '103–105', '100–102', '97–99', 'Car Park'
+        '112-113', '109-111', '106-108', '103-105', '100-102', '97-99', 'Car Park'
       ]},
       {id: 4, lat: 51.4956673, lon: 0.0754844, label: '4', info: 'Entrance 4', serves: [
         '129-130', '126-128', '123-125', '120-122', '117-119', '114-116', 'Car Park'
@@ -178,20 +184,20 @@
       {id: 8, lat: 51.4949996, lon: 0.0760259, label: '8', info: 'Entrance 8', serves: [
         '227', '255-258', '267-269', '270', '271-276', '277-280', '291-296', '307-310', '311-314', '321', '322'
       ]},
-      {id: 9, lat: 51.494802, lon: 0.075204, label: '9', info: 'Entrance 9', serves: ['239', '259-266', '281-290', '298-306', '315-320']},
+      {id: 9, lat: 51.4948332, lon: 0.0752681, label: '9', info: 'Entrance 9', serves: ['239', '259-266', '281-290', '298-306', '315-320']},
     ];
 
     // Apartment to entrance mapping (update as needed for S1/S2)
     function getEntranceForApt(apt) {
       // Accept both string and number input
       if (typeof apt === 'string') apt = apt.trim().toUpperCase();
-      // S2: 233-238, 240-242, 249, 250, 251, 252
+      // S2: 228-232, 243-246, 247, 248, 253, 254
       if (
         apt === 'S2' ||
         (typeof apt === 'number' && (
-          (apt >= 233 && apt <= 238) ||
-          (apt >= 240 && apt <= 242) ||
-          [249, 250, 251, 252].includes(apt)
+          (apt >= 228 && apt <= 232) ||
+          (apt >= 243 && apt <= 246) ||
+          [247, 248, 253, 254].includes(apt)
         ))
       ) return 's2';
 
@@ -293,11 +299,39 @@
       if (!Array.isArray(entrancesArr)) entrancesArr = [entrancesArr];
       entrancesArr.forEach((e, idx) => {
         if (idx > 0) html += '<hr style="margin:0.5em 0">';
-        html += `<b>${e.info}</b><br>Lat: ${e.lat}, Lon: ${e.lon}`;
+        // Entrance name and coordinates
+        html += `<b>${e.info}</b> <span style="color:#888;font-size:0.97em;">(${e.lat.toFixed(6)}, ${e.lon.toFixed(6)})</span>`;
+
+        // Notes about concealed/unlabelled entrances (directly under name/coords)
+        if (e.id === 8 || e.id === 9) {
+          html += `<br><span style=\"color:#e53935;font-weight:bold;display:block;margin-top:0.2em;\">The entrance and intercom are concealed, up a small footpath.</span>`;
+        }
+        if (e.id === 's1' || e.id === 's2') {
+          html += `<br><span style=\"color:#e53935;font-weight:bold;display:block;margin-top:0.2em;\">Note: The entrance numbers are not printed on these doors.</span>`;
+        }
+
+        // Floor breakdown (apartments per floor)
         if (showServed && e.serves && e.serves.length > 0) {
           if (e.id === 's2') {
             html += `<br><b>Serves apartments:</b><br>`;
-            html += `<span style=\"color:#1976d2\"><b>G:</b> 228-232, 243-246<br><b>1:</b> 247, 248<br><b>2:</b> 253, 254<br><b>Other:</b> 233-238, 240-242, 249, 250, 251, 252</span>`;
+            html += `<span style=\"color:#1976d2\">`;
+            e.serves.forEach(floor => {
+              const match = floor.match(/^([\dG]): (.+)$/);
+              if (match) {
+                html += `<b>${match[1]}:</b> ${match[2]}<br>`;
+              }
+            });
+            html += `</span>`;
+          } else if (e.id === 's1') {
+            html += `<br><b>Serves apartments:</b><br>`;
+            html += `<span style=\"color:#1976d2\">`;
+            e.serves.forEach(floor => {
+              const match = floor.match(/^(\d|G): (.+)$/);
+              if (match) {
+                html += `<b>${match[1]}:</b> ${match[2]}<br>`;
+              }
+            });
+            html += `</span>`;
           } else if (e.id === 8) {
             html += `<br><b>Serves apartments:</b><br>`;
             html += `<span style=\"color:#1976d2\">
@@ -332,30 +366,71 @@
             </span>`;
           } else if (e.id === 3) {
             html += `<br><b>Serves apartments:</b><br>`;
-            html += `<span style=\"color:#1976d2\">\n              <b>5:</b> 112–113<br>\n              <b>4:</b> 109–111<br>\n              <b>3:</b> 106–108<br>\n              <b>2:</b> 103–105<br>\n              <b>1:</b> 100–102<br>\n              <b>G:</b> 97–99<br>\n              <b>B:</b> Car Park\n            </span>`;
+            html += `<span style=\"color:#1976d2\">\n    <b>5:</b> 112–113<br>\n    <b>4:</b> 109–111<br>\n    <b>3:</b> 106–108<br>\n    <b>2:</b> 103–105<br>\n    <b>1:</b> 100–102<br>\n    <b>G:</b> 97–99<br>\n    <b>B:</b> Car Park\n  </span>`;
+          } else if (e.id === 2) {
+            html += `<br><b>Serves apartments:</b><br>`;
+            html += `<span style=\"color:#1976d2\">
+              <b>6:</b> 94–96<br>
+              <b>5:</b> 85–89<br>
+              <b>4:</b> 71–78<br>
+              <b>3:</b> 55–62<br>
+              <b>2:</b> 39–46<br>
+              <b>1:</b> 23–30<br>
+              <b>G:</b> 1–8<br>
+              <b>B:</b> Car Park
+            </span>`;
+          } else if (e.id === 1) {
+            html += `<br><b>Serves apartments:</b><br>`;
+            html += `<span style=\"color:#1976d2\">
+              <b>6:</b> 91–93<br>
+              <b>5:</b> 81–84, 90<br>
+              <b>4:</b> 65–70, 79, 80<br>
+              <b>3:</b> 49–54, 63, 64<br>
+              <b>2:</b> 33–38, 47, 48<br>
+              <b>1:</b> 17–22, 31, 32<br>
+              <b>G:</b> 9–16<br>
+              <b>B:</b> Car Park
+            </span>`;
+          } else if (e.id === 9) {
+            html += `<br><b>Serves apartments:</b><br>`;
+            html += `<span style=\"color:#1976d2\">
+              <b>5:</b> 315–320<br>
+              <b>4:</b> 297–306<br>
+              <b>3:</b> 281–290<br>
+              <b>2:</b> 259–266<br>
+              <b>G:</b> 239
+            </span>`;
           } else {
             html += `<br><b>Serves apartments:</b> <span style=\"color:#1976d2\">${e.serves.join(', ')}</span>`;
           }
         }
-        if (e.id === 8 || e.id === 9) {
-          html += `<br><span style=\"color:#e53935;font-weight:bold;\">The entrance and intercom are concealed, up a small footpath.</span>`;
+
+        // Images (move up, less margin)
+        let prefix =
+          e.id === 's2' ? 'S2'
+          : e.id === 's1' ? 'S1'
+          : e.id === 9 ? '9'
+          : e.id === 8 ? '8'
+          : e.id === 6 ? '6'
+          : e.id === 5 ? '5'
+          : e.id === 4 ? '4'
+          : e.id === 3 ? '3'
+          : e.id === 2 ? '2'
+          : e.id === 1 ? '1'
+          : e.id;
+
+        html += `<div class=\"s2-image-row\" style=\"margin-top:0.5em;margin-bottom:0.7em;\">`;
+        // Entrance image for 8 and 9 only
+        if (e.id === 8) {
+          html += `<div class=\"s2-image-thumb\"><a href=\"/images/core/8-Entrance.jpeg\" target=\"_blank\" rel=\"noopener\"><img src=\"/images/core/8-Entrance.jpeg\" alt=\"8 Entrance\"></a><br><span>Entrance</span></div>`;
+        } else if (e.id === 9) {
+          html += `<div class=\"s2-image-thumb\"><a href=\"/images/core/9-Enterance.jpeg\" target=\"_blank\" rel=\"noopener\"><img src=\"/images/core/9-Enterance.jpeg\" alt=\"9 Entrance\"></a><br><span>Entrance</span></div>`;
         }
-        if (e.id === 's1' || e.id === 's2') {
-          html += `<br><span style=\"color:#e53935;font-weight:bold;\">Note: The entrance numbers are not printed on these doors.</span>`;
-        }
-        // Show S2, 8, 6, or 5 images if S2, 8, 6, or 5 entrance (but not Entrance for 6 or 5)
-        if (e.id === 's2' || e.id === 8 || e.id === 6 || e.id === 5) {
-          const prefix = e.id === 's2' ? 'S2' : (e.id === 8 ? '8' : (e.id === 6 ? '6' : '5'));
-          html += `<div class=\"s2-image-row\">`;
-          if (e.id !== 6 && e.id !== 5) {
-            html += `<div class=\"s2-image-thumb\"><a href=\"/images/core/${prefix}-Entrance.jpeg\" target=\"_blank\" rel=\"noopener\"><img src=\"/images/core/${prefix}-Entrance.jpeg\" alt=\"${prefix} Entrance\"></a><br><span>Entrance</span></div>`;
-          }
-          html += `
-            <div class=\"s2-image-thumb\"><a href=\"/images/core/${prefix}-External.jpeg\" target=\"_blank\" rel=\"noopener\"><img src=\"/images/core/${prefix}-External.jpeg\" alt=\"${prefix} External\"></a><br><span>External</span></div>
-            <div class=\"s2-image-thumb\"><a href=\"/images/core/${prefix}-Floors.jpeg\" target=\"_blank\" rel=\"noopener\"><img src=\"/images/core/${prefix}-Floors.jpeg\" alt=\"${prefix} Floors\"></a><br><span>Floors</span></div>
-          `;
-          html += `</div>`;
-        }
+        // External image for all
+        html += `<div class=\"s2-image-thumb\"><a href=\"/images/core/${prefix}-External.jpeg\" target=\"_blank\" rel=\"noopener\"><img src=\"/images/core/${prefix}-External.jpeg\" alt=\"${prefix} External\"></a><br><span>External</span></div>`;
+        // Floors image for all
+        html += `<div class=\"s2-image-thumb\"><a href=\"/images/core/${prefix}-Floors.jpeg\" target=\"_blank\" rel=\"noopener\"><img src=\"/images/core/${prefix}-Floors.jpeg\" alt=\"${prefix} Floors\"></a><br><span>Floors</span></div>`;
+        html += `</div>`;
       });
       infoDiv.innerHTML = html;
       infoDiv.style.display = 'block';
