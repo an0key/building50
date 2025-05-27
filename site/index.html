@@ -277,7 +277,7 @@
           (apt >= 311 && apt <= 314) ||
           (apt >= 321 && apt <= 322)
         ))
-      ) return 8;
+      return 8;
 
       // 1: 1-96 (core 1 or 2)
       if (apt === 1 || apt === 2 || (typeof apt === 'number' && apt >= 1 && apt <= 96)) return [1,2];
@@ -463,11 +463,14 @@
         } else {
           // Multiple entrances (e.g. [1,2] or [5,6])
           let labels = foundEntrances.map(enObj => `<b>${enObj.label}</b>`).join(' or ');
-          // Try to get floor (should be the same for both)
-          let floor = getFloorForApt(aptNum, foundEntrances[0]);
+          // Show floor info for each entrance if possible
+          let floors = foundEntrances.map(enObj => getFloorForApt(aptNum, enObj));
+          let uniqueFloors = [...new Set(floors.filter(Boolean))];
           msg = `Apartment ${aptNum} is accessed via Core/Entrance ${labels}`;
-          if (floor) {
-            msg += `, and is on Floor <b>${floor}</b>`;
+          if (uniqueFloors.length === 1) {
+            msg += `, and is on Floor <b>${uniqueFloors[0]}</b>`;
+          } else if (uniqueFloors.length > 1) {
+            msg += `, and is on Floor <b>${uniqueFloors.join(' or ')}</b>`;
           }
         }
         infoMsgDiv.innerHTML = msg;
