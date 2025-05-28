@@ -484,6 +484,7 @@
         }
         infoMsgDiv.innerHTML = msg;
         infoMsgDiv.style.display = '';
+        instructionDiv.style.display = 'none';
         // Scroll to entrance info anchor
         const anchor = document.getElementById('entrance-info-anchor');
         if (anchor) {
@@ -493,7 +494,7 @@
         }
       } else {
         infoMsgDiv.style.display = 'none';
-        instructionDiv.style.display = '';
+        instructionDiv.style.display = foundEntrances.length > 0 ? 'none' : '';
       }
 
       if (foundEntrances.length > 0) {
