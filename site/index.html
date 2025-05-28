@@ -96,6 +96,7 @@
   <div class="container">
     <h1>Building 50 Entrance Finder</h1>
     <div style="height:1em;"></div>
+    <a id="entrance-info-anchor"></a>
     <form id="apt-form" class="input-group">
       <input type="number" id="apt-input" min="1" max="322" placeholder="Apt #" required>
       <button type="submit">Find Entrance</button>
@@ -483,7 +484,13 @@
         }
         infoMsgDiv.innerHTML = msg;
         infoMsgDiv.style.display = '';
-        instructionDiv.style.display = 'none';
+        // Scroll to entrance info anchor
+        const anchor = document.getElementById('entrance-info-anchor');
+        if (anchor) {
+          setTimeout(() => {
+            anchor.scrollIntoView({behavior: 'smooth', block: 'start'});
+          }, 50);
+        }
       } else {
         infoMsgDiv.style.display = 'none';
         instructionDiv.style.display = '';
